@@ -7,7 +7,7 @@ import '../models/user.dart';
 
 class AuthService {
   // Ganti dengan base URL API Laravel Anda
-  final String baseUrl = 'http://192.168.100.6:8000/api';
+  final String baseUrl = 'http://192.168.100.5:8000/api';
   // Note: 10.0.2.2 adalah alamat localhost untuk emulator Android
   // Untuk iOS simulator, gunakan 'http://localhost:8000/api'
   // Untuk perangkat fisik, gunakan IP jaringan Anda

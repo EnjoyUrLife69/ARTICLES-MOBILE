@@ -3,7 +3,9 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'package:articles_mobile/screens/search_page.dart';
 import 'package:articles_mobile/utils/ui_utils.dart';
+import 'package:articles_mobile/widgets/custom_footer..dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
@@ -135,7 +137,14 @@ class _HomePageState extends State<HomePage> {
             actions: [
               IconButton(
                 icon: Icon(Icons.search),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SearchPage(),
+                    ),
+                  );
+                },
               ),
               PopupMenuButton<String>(
                 onSelected: (value) {
@@ -217,7 +226,7 @@ class _HomePageState extends State<HomePage> {
                       Navigator.pop(context); // Tutup drawer
 
                       if (success) {
-                        // Ganti SnackBar standar dengan notifikasi elegan
+                        // Notif
                         showElegantNotification(context, 'Logout Successfully!');
                       }
                     } else {
@@ -305,8 +314,9 @@ class _HomePageState extends State<HomePage> {
                                                       article.category?.name ??
                                                           'Uncategorized',
                                                       style: TextStyle(
-                                                          color: Colors.white70,
-                                                          fontSize: 14),
+                                                          color: const Color.fromARGB(179, 252, 167, 9),
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.bold),
                                                     ),
                                                     Text(
                                                       article.title,
@@ -442,75 +452,71 @@ class _HomePageState extends State<HomePage> {
                                 itemCount: filteredArticles.length,
                                 itemBuilder: (context, index) {
                                   final article = filteredArticles[index];
-                                  return GestureDetector(
-                                    onTap: () => _navigateToDetailPage(article),
-                                    child: Card(
-                                      elevation: 4,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          // Gambar Artikel
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.vertical(
-                                                top: Radius.circular(12)),
-                                            child: Container(
-                                              height:
-                                                  150.0, // Atur tinggi gambar sesuai keinginan
-                                              child: _buildGridArticleImage(
-                                                  article.cover, 120.0),
-                                            ),
-                                          ),
-
-                                          SizedBox(
-                                              height:
-                                                  10), // Jarak antara gambar dan kategori
-
-                                          // Kategori (Warna Emas, Center) dengan margin top tambahan
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                top:
-                                                    10), // Menambah margin top untuk kategori
-                                            child: Text(
-                                              article.category?.name ??
-                                                  'Uncategorized',
-                                              style: TextStyle(
-                                                color: Colors.amber[700],
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
+                                  return MouseRegion(
+                                    cursor: SystemMouseCursors
+                                        .click, // Menambahkan kursor pointer
+                                    child: GestureDetector(
+                                      onTap: () =>
+                                          _navigateToDetailPage(article),
+                                      child: Card(
+                                        elevation: 4,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            // Gambar Artikel
+                                            ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.vertical(
+                                                      top: Radius.circular(12)),
+                                              child: Container(
+                                                height: 150.0,
+                                                child: _buildGridArticleImage(
+                                                    article.cover, 120.0),
                                               ),
-                                              textAlign: TextAlign.center,
                                             ),
-                                          ),
 
-                                          SizedBox(
-                                              height:
-                                                  5), // Jarak antara kategori dan judul
+                                            SizedBox(height: 10),
 
-                                          // Judul (Center) dengan margin top tambahan
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                top: 5,
-                                                left: 10,
-                                                right:
-                                                    10), // Menambah margin top untuk judul
-                                            child: Text(
-                                              article.title,
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
+                                            // Kategori (Warna Emas, Center) dengan margin top tambahan
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 10),
+                                              child: Text(
+                                                article.category?.name ??
+                                                    'Uncategorized',
+                                                style: TextStyle(
+                                                  color: Colors.amber[700],
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
                                               ),
-                                              softWrap:
-                                                  true, // Membuat teks bisa wrap ke baris baru
-                                              overflow: TextOverflow
-                                                  .visible, // Agar teks tetap terlihat sepenuhnya
                                             ),
-                                          ),
-                                        ],
+
+                                            SizedBox(height: 5),
+
+                                            // Judul (Center) dengan margin top tambahan
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 5, left: 10, right: 10),
+                                              child: Text(
+                                                article.title,
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                softWrap: true,
+                                                overflow: TextOverflow.visible,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   );
@@ -619,8 +625,13 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
 
-                              // Padding di bagian bawah agar tampilan lebih baik
+                            // Padding di bagian bawah agar tampilan lebih baik
                               SizedBox(height: 20),
+
+                              // Footer
+                              CustomFooter(),
+
+                              
                             ],
                           ),
                         ),
