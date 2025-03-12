@@ -1,4 +1,6 @@
 import 'dart:developer';
+import 'package:articles_mobile/providers/auth_provider.dart';
+import 'package:articles_mobile/utils/ui_utils.dart';
 import 'package:articles_mobile/widgets/custom_footer..dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -253,33 +255,45 @@ class DetailPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
 
-                        // Share Button
-                        Center(
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.share, color: Colors.white),
-                            label: const Text('Share Article'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.black,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                            ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Sharing article...'),
-                                  backgroundColor: Colors.black54,
+                        // Share Button and Like
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Tombol Share
+                            ElevatedButton.icon(
+                              icon:
+                                  const Icon(Icons.share, color: Colors.white),
+                              label: const Text('Share Article'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.black,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
                                 ),
-                              );
-                            },
-                          ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              onPressed: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Sharing article...'),
+                                    backgroundColor: Colors.black54,
+                                  ),
+                                );
+                              },
+                            ),
+
+                            // Tambahkan jarak antara tombol
+                            SizedBox(width: 12),
+
+                            // Tombol Like
+                            _buildLikeButton(context, displayArticle),
+                          ],
                         ),
-                        const SizedBox(height: 32),
+                        
+                        SizedBox(height: 20),
 
                         // Related Articles
                         const Text(
@@ -301,13 +315,12 @@ class DetailPage extends StatelessWidget {
                           },
                         ),
                         const SizedBox(height: 24),
-
                       ],
                     ),
                   ),
                 ),
               ),
-              
+
               SliverToBoxAdapter(
                 child: CustomFooter(),
               ),
@@ -315,6 +328,133 @@ class DetailPage extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildLikeButton(BuildContext context, Article article) {
+    return Consumer2<ArticleProvider, AuthProvider>(
+      builder: (context, articleProvider, authProvider, _) {
+        // Cek apakah user sudah login
+        final isLoggedIn = authProvider.isLoggedIn;
+        // Cek status like dari provider
+        final isLiked = articleProvider.isLiked;
+
+        // Logging untuk debug
+        print('Building like button for article ${article.id}');
+        print('User logged in: $isLoggedIn');
+        print('Article is liked: $isLiked');
+        print('Current like count: ${article.likeCount}');
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Tombol Like
+            ElevatedButton.icon(
+              icon: Icon(
+                isLiked ? Icons.favorite : Icons.favorite_border,
+                color: isLiked ? Colors.red : Colors.white,
+              ),
+              label: Text(
+                isLiked ? 'Liked' : 'Like',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              onPressed: () async {
+                print('Like button pressed for article ${article.id}');
+
+                if (!isLoggedIn) {
+                  print('User not logged in, showing login message');
+                  // Jika belum login, arahkan ke halaman login
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Silahkan login terlebih dahulu'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  Navigator.pushNamed(context, '/login');
+                  return;
+                }
+
+                print('Attempting to toggle like...');
+                // Toggle like/unlike dengan debugging
+                try {
+                  final success = await articleProvider.toggleLike(article.id);
+                  print('Toggle like result: $success');
+
+                  if (success) {
+                    print('Like status updated to: ${articleProvider.isLiked}');
+                    print(
+                        'New like count: ${articleProvider.selectedArticle?.likeCount}');
+
+                    showElegantNotification(
+                      context,
+                      articleProvider.isLiked
+                          ? 'Article Liked'
+                          : 'Article Unliked',
+                    );
+                  } else {
+                    print('Toggle like failed with success=false');
+                    // Tambahkan notifikasi kegagalan
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Gagal mengubah status like'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  print('Exception toggling like: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+            ),
+
+            // Jumlah Like
+            Container(
+              margin: EdgeInsets.only(left: 8),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.favorite,
+                    color: Colors.red,
+                    size: 16,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    '${article.likeCount}',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

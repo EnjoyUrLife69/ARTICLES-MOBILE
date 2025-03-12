@@ -46,6 +46,36 @@ class Article {
       user: json['user'] != null ? User.fromJson(json['user']) : null,
     );
   }
+
+  Article copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? content,
+    String? cover,
+    String? status,
+    String? releaseDate,
+    int? viewCount,
+    int? shareCount,
+    int? likeCount,
+    Category? category,
+    User? user,
+  }) {
+    return Article(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      content: content ?? this.content,
+      cover: cover ?? this.cover,
+      status: status ?? this.status,
+      releaseDate: releaseDate ?? this.releaseDate,
+      viewCount: viewCount ?? this.viewCount,
+      shareCount: shareCount ?? this.shareCount,
+      likeCount: likeCount ?? this.likeCount,
+      category: category ?? this.category,
+      user: user ?? this.user,
+    );
+  }
 }
 
 class Category {

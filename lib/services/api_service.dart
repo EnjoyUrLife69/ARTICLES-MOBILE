@@ -1,12 +1,13 @@
 // lib/services/api_service.dart
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'package:articles_mobile/services/auth_service.dart';
 import 'package:http/http.dart' as http;
 import '../models/article_model.dart';
 
 class ApiService {
   // Replace with your API base URL - adjust based on your environment
-  static const String baseUrl = 'http://192.168.100.5:8000/api'; // Android emulator
+  static const String baseUrl = 'http://192.168.100.2:8000/api'; // Android emulator
   // static const String baseUrl = 'http://127.0.0.1:8000/api'; // iOS simulator
   // static const String baseUrl = 'https://your-production-api.com/api'; // Production
 
@@ -91,5 +92,110 @@ class ApiService {
   // Helper function for min
   int min(int a, int b) {
     return a < b ? a : b;
+  }
+
+  // Like/Unlike artikel (toggle)
+  Future<Map<String, dynamic>> toggleLikeArticle(String articleId) async {
+    try {
+      // Dapatkan token dari AuthService
+      final authService = AuthService();
+      final token = await authService.getToken();
+
+      if (token == null) {
+        return {
+          'success': false,
+          'message': 'Anda harus login terlebih dahulu',
+        };
+      }
+
+      developer.log('Toggling like for article ID: $articleId');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/articles/$articleId/like'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      developer.log('Like toggle response status code: ${response.statusCode}');
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        developer.log('Like toggle response: ${json.encode(jsonResponse)}');
+
+        return {
+          'success': true,
+          'liked': jsonResponse['liked'] ?? false,
+          'likeCount': jsonResponse['like_count'] ?? 0,
+          'message': jsonResponse['message'] ?? 'Berhasil mengubah status like',
+        };
+      } else {
+        developer.log('Error like toggle response: ${response.body}');
+        return {
+          'success': false,
+          'message': 'Gagal mengubah status like: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      developer.log('Exception during like toggle API call: $e');
+      return {
+        'success': false,
+        'message': 'Terjadi kesalahan: $e',
+      };
+    }
+  }
+
+// Cek status like artikel
+  Future<Map<String, dynamic>> checkArticleLikeStatus(String articleId) async {
+    try {
+      // Dapatkan token dari AuthService
+      final authService = AuthService();
+      final token = await authService.getToken();
+
+      if (token == null) {
+        return {
+          'success': true,
+          'isLiked': false,
+        };
+      }
+
+      developer.log('Checking like status for article ID: $articleId');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/articles/$articleId/check-like'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      developer.log('Check like status response code: ${response.statusCode}');
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        developer
+            .log('Check like status response: ${json.encode(jsonResponse)}');
+
+        return {
+          'success': true,
+          'isLiked': jsonResponse['is_liked'] ?? false,
+        };
+      } else {
+        developer.log('Error check like status response: ${response.body}');
+        return {
+          'success': false,
+          'isLiked': false,
+          'message': 'Gagal memeriksa status like: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      developer.log('Exception during check like status API call: $e');
+      return {
+        'success': false,
+        'isLiked': false,
+        'message': 'Terjadi kesalahan: $e',
+      };
+    }
   }
 }
