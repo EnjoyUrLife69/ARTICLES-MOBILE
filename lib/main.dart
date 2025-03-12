@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'providers/article_provider.dart';
+import 'providers/auth_provider.dart'; // Pastikan ini diimpor
 import 'screens/home_page.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/auth/register_screen.dart';
 import 'utils/http_override.dart';
 
 void main() {
@@ -18,8 +21,12 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ArticleProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ArticleProvider()),
+        ChangeNotifierProvider(
+            create: (context) => AuthProvider()), // Tambahkan AuthProvider
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
@@ -34,7 +41,13 @@ class MyApp extends StatelessWidget {
           ),
           textTheme: GoogleFonts.poppinsTextTheme(),
         ),
-        home: HomePage(),
+        // Definisikan routes
+        initialRoute: '/',
+        routes: {
+          '/': (context) => HomePage(),
+          '/login': (context) => LoginScreen(),
+          '/register': (context) => RegisterScreen(),
+        },
       ),
     );
   }

@@ -1,11 +1,15 @@
 // lib/screens/home_page.dart
+// ignore_for_file: prefer_const_constructors
+
 import 'dart:async';
 import 'dart:developer';
+import 'package:articles_mobile/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../models/article_model.dart';
 import '../providers/article_provider.dart';
+import '../providers/auth_provider.dart';
 import 'detail_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -135,12 +139,19 @@ class _HomePageState extends State<HomePage> {
               ),
               PopupMenuButton<String>(
                 onSelected: (value) {
-                  print('$value clicked');
+                  if (value == 'login') {
+                    Navigator.pushNamed(context, '/login');
+                  } else if (value == 'logout') {
+                    Provider.of<AuthProvider>(context, listen: false).logout();
+                  }
                 },
-                itemBuilder: (BuildContext context) => [
-                  PopupMenuItem(value: 'login', child: Text('Login')),
-                  PopupMenuItem(value: 'logout', child: Text('Logout')),
-                ],
+                itemBuilder: (BuildContext context) {
+                  final authProvider =
+                      Provider.of<AuthProvider>(context, listen: false);
+                  return authProvider.isLoggedIn
+                      ? [PopupMenuItem(value: 'logout', child: Text('Logout'))]
+                      : [PopupMenuItem(value: 'login', child: Text('Login'))];
+                },
                 child: CircleAvatar(
                   backgroundColor: Colors.grey.shade300,
                   child: Icon(Icons.person, color: Colors.black),
@@ -154,22 +165,31 @@ class _HomePageState extends State<HomePage> {
               children: [
                 DrawerHeader(
                   decoration: BoxDecoration(color: Colors.black),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        radius: 30,
-                        child:
-                            Icon(Icons.person, color: Colors.black, size: 30),
-                      ),
-                      SizedBox(height: 10),
-                      Text("User Name",
-                          style: TextStyle(color: Colors.white, fontSize: 18)),
-                      Text("user@example.com",
-                          style:
-                              TextStyle(color: Colors.white70, fontSize: 14)),
-                    ],
+                  child: Consumer<AuthProvider>(
+                    builder: (context, authProvider, _) {
+                      final isLoggedIn = authProvider.isLoggedIn;
+                      final user = authProvider.user;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 30,
+                            child: Icon(Icons.person,
+                                color: Colors.black, size: 30),
+                          ),
+                          SizedBox(height: 10),
+                          Text(isLoggedIn ? user?.name ?? "User" : "Guest",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18)),
+                          Text(
+                              isLoggedIn ? user?.email ?? "" : "Silahkan login",
+                              style: TextStyle(
+                                  color: Colors.white70, fontSize: 14)),
+                        ],
+                      );
+                    },
                   ),
                 ),
                 ListTile(
@@ -185,10 +205,27 @@ class _HomePageState extends State<HomePage> {
                     title: Text('Settings'),
                     onTap: () {}),
                 Divider(),
+                // Contoh implementasi di Drawer
                 ListTile(
-                    leading: Icon(Icons.logout),
-                    title: Text('Logout'),
-                    onTap: () {}),
+                  leading: Icon(Icons.logout),
+                  title: Text('Logout'),
+                  onTap: () async {
+                    final authProvider =
+                        Provider.of<AuthProvider>(context, listen: false);
+                    if (authProvider.isLoggedIn) {
+                      final success = await authProvider.logout();
+                      Navigator.pop(context); // Tutup drawer
+
+                      if (success) {
+                        // Ganti SnackBar standar dengan notifikasi elegan
+                        showElegantNotification(context, 'Logout Successfully!');
+                      }
+                    } else {
+                      Navigator.pop(context); // Tutup drawer
+                      Navigator.pushNamed(context, '/login');
+                    }
+                  },
+                ),
               ],
             ),
           ),
@@ -213,6 +250,7 @@ class _HomePageState extends State<HomePage> {
                   : articles.isEmpty
                       ? Center(child: Text('No articles found'))
                       : SingleChildScrollView(
+                          physics: ClampingScrollPhysics(),
                           child: Column(
                             children: [
                               // Slideshow
@@ -346,6 +384,7 @@ class _HomePageState extends State<HomePage> {
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 8.0),
                                 child: SingleChildScrollView(
+                                  physics: ClampingScrollPhysics(),
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
                                     children: [
@@ -418,39 +457,57 @@ class _HomePageState extends State<HomePage> {
                                           ClipRRect(
                                             borderRadius: BorderRadius.vertical(
                                                 top: Radius.circular(12)),
-                                            child: _buildGridArticleImage(
-                                                article.cover, 120.0),
-                                          ),
-
-                                          SizedBox(height: 10),
-
-                                          // Kategori (Warna Emas, Center)
-                                          Text(
-                                            article.category?.name ??
-                                                'Uncategorized',
-                                            style: TextStyle(
-                                              color: Colors.amber[700],
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
+                                            child: Container(
+                                              height:
+                                                  150.0, // Atur tinggi gambar sesuai keinginan
+                                              child: _buildGridArticleImage(
+                                                  article.cover, 120.0),
                                             ),
-                                            textAlign: TextAlign.center,
                                           ),
 
-                                          SizedBox(height: 5),
+                                          SizedBox(
+                                              height:
+                                                  10), // Jarak antara gambar dan kategori
 
-                                          // Judul (Center)
+                                          // Kategori (Warna Emas, Center) dengan margin top tambahan
                                           Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 10),
+                                            padding: const EdgeInsets.only(
+                                                top:
+                                                    10), // Menambah margin top untuk kategori
+                                            child: Text(
+                                              article.category?.name ??
+                                                  'Uncategorized',
+                                              style: TextStyle(
+                                                color: Colors.amber[700],
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+
+                                          SizedBox(
+                                              height:
+                                                  5), // Jarak antara kategori dan judul
+
+                                          // Judul (Center) dengan margin top tambahan
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 5,
+                                                left: 10,
+                                                right:
+                                                    10), // Menambah margin top untuk judul
                                             child: Text(
                                               article.title,
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: 14,
                                                 fontWeight: FontWeight.bold,
                                               ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
+                                              softWrap:
+                                                  true, // Membuat teks bisa wrap ke baris baru
+                                              overflow: TextOverflow
+                                                  .visible, // Agar teks tetap terlihat sepenuhnya
                                             ),
                                           ),
                                         ],
