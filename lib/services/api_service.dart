@@ -6,10 +6,8 @@ import 'package:http/http.dart' as http;
 import '../models/article_model.dart';
 
 class ApiService {
-  // Replace with your API base URL - adjust based on your environment
-  static const String baseUrl = 'http://192.168.100.2:8000/api'; // Android emulator
-  // static const String baseUrl = 'http://127.0.0.1:8000/api'; // iOS simulator
-  // static const String baseUrl = 'https://your-production-api.com/api'; // Production
+  // API base URL
+  static const String baseUrl = 'http://192.168.193.48:8000/api';
 
   // Get all articles with debug logging
   Future<List<Article>> getArticles() async {
