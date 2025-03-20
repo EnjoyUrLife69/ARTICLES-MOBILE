@@ -81,6 +81,7 @@ class DetailPage extends StatelessWidget {
           return CustomScrollView(
             slivers: [
               // Elegant White and Black SliverAppBar
+              // Replace the SliverAppBar section in your DetailPage with this improved version
               SliverAppBar(
                 expandedHeight: 300.0,
                 floating: false,
@@ -94,16 +95,8 @@ class DetailPage extends StatelessWidget {
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
-                title: Text(
-                  displayArticle.title,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                // Remove the title from the app bar to avoid duplication
+                title: null, // This removes the title from the app bar
                 flexibleSpace: FlexibleSpaceBar(
                   background: Stack(
                     fit: StackFit.expand,
@@ -116,8 +109,31 @@ class DetailPage extends StatelessWidget {
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              Colors.black.withOpacity(0.3),
+                              Colors.black.withOpacity(0.5),
                             ],
+                          ),
+                        ),
+                      ),
+                      // Keep only this title overlay at the bottom of the flexible space
+                      Positioned(
+                        left: 16,
+                        right: 16,
+                        bottom: 16,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            displayArticle.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ),
@@ -292,7 +308,7 @@ class DetailPage extends StatelessWidget {
                             _buildLikeButton(context, displayArticle),
                           ],
                         ),
-                        
+
                         SizedBox(height: 20),
 
                         // Related Articles
