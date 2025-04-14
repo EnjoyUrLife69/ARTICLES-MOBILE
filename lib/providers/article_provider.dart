@@ -94,7 +94,6 @@ class ArticleProvider with ChangeNotifier {
     }
   }
 
-  // Toggle status like artikel
   // Toggle status like artikel (versi refactor)
   Future<bool> toggleLike(String articleId) async {
     try {

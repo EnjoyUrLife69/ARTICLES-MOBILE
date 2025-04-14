@@ -7,7 +7,7 @@ import '../models/user.dart';
 
 class AuthService {
   // API base URL
-  final String baseUrl = 'http://192.168.100.4:8000/api';
+  final String baseUrl = 'http://192.168.0.210:8000/api';
 
   // Menyimpan token ke SharedPreferences
   Future<void> storeToken(String token) async {

@@ -227,7 +227,8 @@ class _HomePageState extends State<HomePage> {
 
                       if (success) {
                         // Notif
-                        showElegantNotification(context, 'Logout Successfully!');
+                        showElegantNotification(
+                            context, 'Logout Successfully!');
                       }
                     } else {
                       Navigator.pop(context); // Tutup drawer
@@ -314,9 +315,12 @@ class _HomePageState extends State<HomePage> {
                                                       article.category?.name ??
                                                           'Uncategorized',
                                                       style: TextStyle(
-                                                          color: const Color.fromARGB(179, 252, 167, 9),
+                                                          color: const Color
+                                                              .fromARGB(
+                                                              179, 252, 167, 9),
                                                           fontSize: 14,
-                                                          fontWeight: FontWeight.bold),
+                                                          fontWeight:
+                                                              FontWeight.bold),
                                                     ),
                                                     Text(
                                                       article.title,
@@ -625,13 +629,11 @@ class _HomePageState extends State<HomePage> {
                                 },
                               ),
 
-                            // Padding di bagian bawah agar tampilan lebih baik
+                              // Padding di bagian bawah agar tampilan lebih baik
                               SizedBox(height: 20),
 
                               // Footer
                               CustomFooter(),
-
-                              
                             ],
                           ),
                         ),
@@ -665,16 +667,18 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildArticleImage(String? imageUrl, double height) {
     if (imageUrl == null || imageUrl.isEmpty) {
-      log('Slideshow image URL is null or empty, using placeholder');
-      return Image.network(
-        'https://picsum.photos/800/400',
+      log('Slideshow image URL is null or empty');
+      return Container(
         width: double.infinity,
         height: height,
-        fit: BoxFit.cover,
+        color: Colors.grey[300],
+        child: Icon(Icons.image, size: 50, color: Colors.grey[700]),
       );
     }
 
+    // Tidak perlu format URL lagi karena sudah lengkap dari API
     log('Loading slideshow image: $imageUrl');
+
     return CachedNetworkImage(
       imageUrl: imageUrl,
       width: double.infinity,
@@ -685,14 +689,57 @@ class _HomePageState extends State<HomePage> {
       ),
       errorWidget: (context, url, error) {
         log('Error loading slideshow image: $url - $error');
-        return Image.network(
-          'https://picsum.photos/800/400',
+        return Container(
           width: double.infinity,
           height: height,
-          fit: BoxFit.cover,
+          color: Colors.grey[300],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error, size: 40, color: Colors.red),
+              SizedBox(height: 10),
+              Text('Image not available',
+                  style: TextStyle(color: Colors.grey[700])),
+            ],
+          ),
         );
       },
     );
+  }
+
+// Helper function to format the image URL
+  String _formatImageUrl(String? url) {
+    if (url == null || url.isEmpty) {
+      return ''; // atau URL gambar placeholder
+    }
+
+    // Jika URL sudah lengkap, gunakan langsung
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      // Hapus suffix seperti ":1" jika ada
+      if (url.contains(':')) {
+        url = url.split(':')[0];
+      }
+      return url;
+    }
+
+    // Ekstrak nama file dari URL
+    String filename = url;
+    if (url.contains('/')) {
+      filename = url.split('/').last;
+    }
+
+    // Hapus suffix seperti ":1" jika ada
+    if (filename.contains(':')) {
+      filename = filename.split(':')[0];
+    }
+
+    // Log untuk debugging
+    print("Original URL: $url");
+    print("Extracted filename: $filename");
+    print("Final URL: http://192.168.0.210:8000/storage/images/articles/$filename");
+
+    // Gunakan endpoint API khusus
+    return 'http://192.168.0.210:8000/storage/images/articles/$filename';
   }
 
   Widget _buildGridArticleImage(String? imageUrl, double height) {
