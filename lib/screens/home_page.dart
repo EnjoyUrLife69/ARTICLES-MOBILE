@@ -743,7 +743,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildGridArticleImage(String? imageUrl, double height) {
-    if (imageUrl == null || imageUrl.isEmpty) {
+    if (imageUrl == null || imageUrl.isEmpty) {  
       return Image.network(
         'https://picsum.photos/400/200',
         height: height,

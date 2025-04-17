@@ -1,13 +1,13 @@
-// lib/services/api_service.dart
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:articles_mobile/services/auth_service.dart';
 import 'package:http/http.dart' as http;
 import '../models/article_model.dart';
+import 'package:dio/dio.dart';
 
 class ApiService {
   // API base URL
-  static const String baseUrl = 'http://192.168.0.210:8000/api'; 
+  static const String baseUrl = 'http://192.168.0.210:8000/api';
 
   // Get all articles with debug logging
   Future<List<Article>> getArticles() async {
@@ -95,7 +95,6 @@ class ApiService {
   // Like/Unlike artikel (toggle)
   Future<Map<String, dynamic>> toggleLikeArticle(String articleId) async {
     try {
-      // Dapatkan token dari AuthService
       final authService = AuthService();
       final token = await authService.getToken();
 
@@ -144,10 +143,9 @@ class ApiService {
     }
   }
 
-// Cek status like artikel
+  // Check like status for an article
   Future<Map<String, dynamic>> checkArticleLikeStatus(String articleId) async {
     try {
-      // Dapatkan token dari AuthService
       final authService = AuthService();
       final token = await authService.getToken();
 
@@ -194,6 +192,57 @@ class ApiService {
         'isLiked': false,
         'message': 'Terjadi kesalahan: $e',
       };
+    }
+  }
+
+  // Update the share count of an article
+  Future<Map<String, dynamic>> updateArticleShareCount(String articleId) async {
+    try {
+      final authService = AuthService();
+      final token = await authService.getToken();
+
+      if (token == null) {
+        return {
+          'success': false,
+          'message': 'User not logged in or no token available',
+        };
+      }
+
+      Dio dio = Dio();
+
+      final response = await dio.post(
+        '$baseUrl/articles/update-share/$articleId', // Corrected the URL
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token', // Menambahkan token ke header
+          },
+        ),
+      );
+
+      // Log the response data to check what the server returns
+      print('Response Data: ${response.data}');
+      print('Status Code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        // Berhasil
+        print('Share count updated: ${response.data['share_count']}');
+        return {
+          'success': true,
+          'shareCount': response.data['share_count'] ?? 0,
+        };
+      } else {
+        // Gagal
+        print(
+            'Failed to update share count. Status code: ${response.statusCode}');
+        print('Response: ${response.data}');
+        return {
+          'success': false,
+          'message': 'Failed to update share count',
+        };
+      }
+    } catch (e) {
+      print('API Error updating share count: $e');
+      return {'success': false, 'message': 'Failed to update share count'};
     }
   }
 }
