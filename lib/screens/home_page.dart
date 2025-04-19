@@ -736,10 +736,10 @@ class _HomePageState extends State<HomePage> {
     // Log untuk debugging
     print("Original URL: $url");
     print("Extracted filename: $filename");
-    print("Final URL: http://192.168.0.210:8000/storage/images/articles/$filename");
+    print("Final URL: http://192.168.100.6:8000/storage/images/articles/$filename");
 
     // Gunakan endpoint API khusus
-    return 'http://192.168.0.210:8000/storage/images/articles/$filename';
+    return 'http://192.168.100.6:8000/storage/images/articles/$filename';
   }
 
   Widget _buildGridArticleImage(String? imageUrl, double height) {

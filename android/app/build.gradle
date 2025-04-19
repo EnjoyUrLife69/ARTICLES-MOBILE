@@ -51,8 +51,14 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+
+    kotlinOptions {
+        jvmTarget = "1.8" // atau "18" sesuai kebutuhan
+    }
 }
 
 flutter {
     source = "../.."
 }
+
+
