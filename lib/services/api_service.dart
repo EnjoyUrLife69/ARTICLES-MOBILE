@@ -7,7 +7,7 @@ import 'package:dio/dio.dart';
 
 class ApiService {
   // API base URL
-  static const String baseUrl = 'http://192.168.100.6:8000/api';
+  static const String baseUrl = 'http://192.168.0.210:8000/api';
 
   // Get all articles with debug logging
   Future<List<Article>> getArticles() async {

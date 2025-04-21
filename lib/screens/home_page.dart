@@ -3,6 +3,7 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'package:articles_mobile/screens/category_page.dart';
 import 'package:articles_mobile/screens/search_page.dart';
 import 'package:articles_mobile/utils/ui_utils.dart';
 import 'package:articles_mobile/widgets/custom_footer..dart';
@@ -209,6 +210,17 @@ class _HomePageState extends State<HomePage> {
                     leading: Icon(Icons.article),
                     title: Text('Articles'),
                     onTap: () {}),
+                ListTile(
+                  leading: Icon(Icons.category),
+                  title: Text('Category'),
+                  onTap: () {
+                    // Navigate to CategoryPage without hardcoding the category
+                    Navigator.pushNamed(
+                      context,
+                      '/category', // The route for CategoryPage
+                    );
+                  },
+                ),
                 ListTile(
                     leading: Icon(Icons.settings),
                     title: Text('Settings'),
@@ -562,68 +574,77 @@ class _HomePageState extends State<HomePage> {
                                     articles.length > 3 ? 3 : articles.length,
                                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                                 itemBuilder: (context, index) {
-                                  return Card(
-                                    margin: EdgeInsets.only(bottom: 16.0),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        // Gambar
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                            bottomLeft: Radius.circular(12),
+                                  return GestureDetector(
+                                    onTap: () {
+                                      _navigateToDetailPage(articles[
+                                          index]); // Navigate to detail page
+                                    },
+                                    child: Card(
+                                      margin: EdgeInsets.only(bottom: 16.0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // Gambar
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(12),
+                                              bottomLeft: Radius.circular(12),
+                                            ),
+                                            child: _buildFavoriteArticleImage(
+                                                articles[index].cover, 100.0),
                                           ),
-                                          child: _buildFavoriteArticleImage(
-                                              articles[index].cover, 100.0),
-                                        ),
-                                        // Konten
-                                        Expanded(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(12.0),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  articles[index]
-                                                          .category
-                                                          ?.name ??
-                                                      'Uncategorized',
-                                                  style: TextStyle(
-                                                    color: Colors.amber[700],
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 12,
+                                          // Konten
+                                          Expanded(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    articles[index]
+                                                            .category
+                                                            ?.name ??
+                                                        'Uncategorized',
+                                                    style: TextStyle(
+                                                      color: Colors.amber[700],
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 12,
+                                                    ),
                                                   ),
-                                                ),
-                                                SizedBox(height: 4),
-                                                Text(
-                                                  articles[index].title,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    articles[index].title,
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                                SizedBox(height: 4),
-                                                Text(
-                                                  articles[index].description,
-                                                  style: TextStyle(
-                                                    color: Colors.grey[600],
-                                                    fontSize: 12,
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    articles[index].description,
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 12,
+                                                    ),
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
@@ -736,14 +757,15 @@ class _HomePageState extends State<HomePage> {
     // Log untuk debugging
     print("Original URL: $url");
     print("Extracted filename: $filename");
-    print("Final URL: http://192.168.100.6:8000/storage/images/articles/$filename");
+    print(
+        "Final URL: http:/192.168.0.210:8000/storage/images/articles/$filename");
 
     // Gunakan endpoint API khusus
-    return 'http://192.168.100.6:8000/storage/images/articles/$filename';
+    return 'http:/192.168.0.210:8000/storage/images/articles/$filename';
   }
 
   Widget _buildGridArticleImage(String? imageUrl, double height) {
-    if (imageUrl == null || imageUrl.isEmpty) {  
+    if (imageUrl == null || imageUrl.isEmpty) {
       return Image.network(
         'https://picsum.photos/400/200',
         height: height,

@@ -1,15 +1,16 @@
 // lib/main.dart
-// import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'providers/article_provider.dart';
-import 'providers/auth_provider.dart'; // Pastikan ini diimpor
+import 'providers/auth_provider.dart';
 import 'screens/home_page.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'utils/http_override.dart';
+import 'providers/category_provider.dart'; // Import CategoryProvider
+import 'screens/category_page.dart'; // Import CategoryPage
 
 void main() {
   // Untuk mengabaikan error sertifikat (hanya untuk development)
@@ -24,8 +25,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ArticleProvider()),
+        ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(
-            create: (context) => AuthProvider()), // Tambahkan AuthProvider
+            create: (context) => CategoryProvider()), // Add CategoryProvider
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -47,6 +49,8 @@ class MyApp extends StatelessWidget {
           '/': (context) => HomePage(),
           '/login': (context) => LoginScreen(),
           '/register': (context) => RegisterScreen(),
+          '/category': (context) =>
+              CategoryPage(), // Add route for CategoryPage
         },
       ),
     );

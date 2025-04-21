@@ -386,7 +386,7 @@ class _DetailPageState extends State<DetailPage>
 
                                       // Buat URL artikel untuk dibagikan
                                       final String articleUrl =
-                                          'http://192.168.100.6:8000/api/articles/${displayArticle.id}';
+                                          'http://192.168.0.210:8000/api/articles/${displayArticle.id}';
 
                                       // Buat pesan share
                                       final String shareMessage =
