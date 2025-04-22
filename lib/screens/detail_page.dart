@@ -20,8 +20,6 @@ class DetailPage extends StatefulWidget {
 
   @override
   State<DetailPage> createState() => _DetailPageState();
-
-
 }
 
 class _DetailPageState extends State<DetailPage>
@@ -265,16 +263,38 @@ class _DetailPageState extends State<DetailPage>
                               // Author Info, Description, Main Content, dll...
                               Row(
                                 children: [
+                                  // Gambar Profil User Pembuat Artikel
+                                  // Pastikan displayArticle.user tidak null
                                   CircleAvatar(
                                     radius: 25,
                                     backgroundColor: Colors.black12,
-                                    child: const Icon(
-                                      Icons.person,
-                                      color: Colors.black87,
-                                      size: 30,
-                                    ),
+                                    child: displayArticle.user?.image != null
+                                        ? ClipOval(
+                                            child: CachedNetworkImage(
+                                              imageUrl:
+                                                  'http://192.168.100.4:8000/storage/images/users/${displayArticle.user?.image}', // Akses gambar profil
+                                              fit: BoxFit.cover,
+                                              width: 50,
+                                              height: 50,
+                                              placeholder: (context, url) =>
+                                                  const CircularProgressIndicator(),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      const Icon(
+                                                Icons.error,
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.person,
+                                            color: Colors.black87,
+                                            size: 30,
+                                          ),
                                   ),
+
                                   const SizedBox(width: 12),
+                                  // Informasi Pembuat Artikel
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -386,7 +406,7 @@ class _DetailPageState extends State<DetailPage>
 
                                       // Buat URL artikel untuk dibagikan
                                       final String articleUrl =
-                                          'http://192.168.0.210:8000/api/articles/${displayArticle.id}';
+                                          'http://192.168.100.4:8000/api/articles/${displayArticle.id}';
 
                                       // Buat pesan share
                                       final String shareMessage =

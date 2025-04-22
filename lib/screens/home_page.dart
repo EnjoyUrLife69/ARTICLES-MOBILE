@@ -136,6 +136,7 @@ class _HomePageState extends State<HomePage> {
               },
             ),
             actions: [
+              // Replace this part in your AppBar actions section
               IconButton(
                 icon: Icon(Icons.search),
                 onPressed: () {
@@ -147,29 +148,74 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'login') {
-                    Navigator.pushNamed(context, '/login');
-                  } else if (value == 'logout') {
-                    Provider.of<AuthProvider>(context, listen: false).logout();
-                  }
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, _) {
+                  return GestureDetector(
+                    onTap: () {
+                      if (authProvider.isLoggedIn) {
+                        // Jika sudah login, tampilkan menu untuk logout
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Logout'),
+                              content:
+                                  Text('Are you sure you want to log out?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // Tutup dialog
+                                  },
+                                  child: Text('Cancel'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    // Panggil fungsi logout
+                                    authProvider.logout();
+                                    Navigator.pop(context); // Tutup dialog
+                                    showElegantNotification(
+                                        context, 'Logout Successful!');
+                                  },
+                                  child: Text('Logout'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      } else {
+                        // Jika belum login, arahkan ke halaman login
+                        Navigator.pushNamed(context, '/login');
+                      }
+                    },
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.grey.shade200,
+                      child: authProvider.user?.image == null
+                          ? Icon(Icons.person, color: Colors.black54, size: 20)
+                          : ClipOval(
+                              child: CachedNetworkImage(
+                                imageUrl:
+                                    'http://192.168.100.4:8000/storage/images/users/${authProvider.user?.image}',
+                                fit: BoxFit.cover,
+                                width: 36,
+                                height: 36,
+                                placeholder: (context, url) =>
+                                    CircularProgressIndicator(),
+                                errorWidget: (context, url, error) => Icon(
+                                  Icons.error,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                    ),
+                  );
                 },
-                itemBuilder: (BuildContext context) {
-                  final authProvider =
-                      Provider.of<AuthProvider>(context, listen: false);
-                  return authProvider.isLoggedIn
-                      ? [PopupMenuItem(value: 'logout', child: Text('Logout'))]
-                      : [PopupMenuItem(value: 'login', child: Text('Login'))];
-                },
-                child: CircleAvatar(
-                  backgroundColor: Colors.grey.shade300,
-                  child: Icon(Icons.person, color: Colors.black),
-                ),
               ),
+
               SizedBox(width: 10),
             ],
           ),
+          
           drawer: Drawer(
             child: ListView(
               children: [
@@ -184,19 +230,38 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CircleAvatar(
-                            backgroundColor: Colors.white,
                             radius: 30,
-                            child: Icon(Icons.person,
-                                color: Colors.black, size: 30),
+                            backgroundColor: Colors.white,
+                            child: user?.image == null
+                                ? Icon(Icons.person,
+                                    color: Colors.black, size: 30)
+                                : ClipOval(
+                                    child: CachedNetworkImage(
+                                      imageUrl:
+                                          'http://192.168.100.4:8000/storage/images/users/${user?.image}',
+                                      fit: BoxFit.cover,
+                                      width: 60,
+                                      height: 60,
+                                      placeholder: (context, url) =>
+                                          CircularProgressIndicator(),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(
+                                        Icons.error,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ),
                           ),
                           SizedBox(height: 10),
-                          Text(isLoggedIn ? user?.name ?? "User" : "Guest",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 18)),
                           Text(
-                              isLoggedIn ? user?.email ?? "" : "Silahkan login",
-                              style: TextStyle(
-                                  color: Colors.white70, fontSize: 14)),
+                            isLoggedIn ? user?.name ?? "User" : "Guest",
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                          Text(
+                            isLoggedIn ? user?.email ?? "" : "Silahkan login",
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 14),
+                          ),
                         ],
                       );
                     },
@@ -221,10 +286,6 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
-                ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text('Settings'),
-                    onTap: () {}),
                 Divider(),
                 // Contoh implementasi di Drawer
                 ListTile(
@@ -758,10 +819,10 @@ class _HomePageState extends State<HomePage> {
     print("Original URL: $url");
     print("Extracted filename: $filename");
     print(
-        "Final URL: http:/192.168.0.210:8000/storage/images/articles/$filename");
+        "Final URL: http:/192.168.100.4:8000/storage/images/articles/$filename");
 
     // Gunakan endpoint API khusus
-    return 'http:/192.168.0.210:8000/storage/images/articles/$filename';
+    return 'http:/192.168.100.4:8000/storage/images/articles/$filename';
   }
 
   Widget _buildGridArticleImage(String? imageUrl, double height) {

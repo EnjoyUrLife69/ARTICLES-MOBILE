@@ -1,3 +1,4 @@
+import 'package:articles_mobile/screens/category_articles_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/category_provider.dart';
@@ -290,13 +291,13 @@ class _CategoryPageState extends State<CategoryPage> {
 
                               return GestureDetector(
                                 onTap: () {
-                                  // Navigate to articles by category
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Membuka kategori: $categoryName'),
-                                      duration: Duration(seconds: 1),
-                                      behavior: SnackBarBehavior.floating,
+                                  // Navigasi ke halaman artikel berdasarkan kategori
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          CategoryArticlesPage(
+                                              categoryName: categoryName),
                                     ),
                                   );
                                 },

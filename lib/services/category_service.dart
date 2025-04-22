@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class CategoryService {
-  final String baseUrl = 'http://192.168.0.210:8000/api/categories';
+  final String baseUrl = 'http://192.168.100.4:8000/api/categories';
 
   // Fetch all categories
   Future<List<dynamic>> fetchCategories() async {
